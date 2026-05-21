@@ -207,7 +207,7 @@
         <button id="btn1" onclick="setMode(1)">1. 차원 조작기 (수학+정보)</button>
         <button id="btn2" onclick="setMode(2)">2. 바이오 생태계 (생명+정보)</button>
         <button id="btn3" onclick="setMode(3)">3. 에너지 방전 모델 (물리+정보)</button>
-        <button id="btn4" onclick="setMode(4)">4. 심화: 고해상도 번개 시뮬레이터</button>
+        <button id="btn4" onclick="setMode(4)">4. 번개 시뮬레이터</button>
     </div>
 
     <div id="ui-container"></div>
@@ -222,7 +222,7 @@
             <div class="flash" id="flashLayer" aria-hidden="true"></div>
             <header class="hud">
                 <h2>Storm Fractal</h2>
-                <p>화면을 클릭하여 프랙탈 번개를 생성하세요.</p>
+               
             </header>
         </div>
     </div>
@@ -294,7 +294,7 @@
                 isP5Active = false;
                 if(typeof noLoop === 'function') noLoop(); // p5 연산 정지 (최적화)
                 
-                let msg = createDiv('심화 시뮬레이션입니다. 아래 화면을 직접 클릭해보세요.');
+                let msg = createDiv('번개 시뮬레이션입니다. 아래 화면을 직접 클릭해보세요.');
                 msg.style('color', '#a855f7').style('font-weight', 'bold');
                 msg.parent('ui-container');
             }
