@@ -1,56 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fractal Lightning Storm</title>
+    <title>프랙탈 프로젝트 융합 산출물 통합 예제</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root {
-            --bg-deep: #03050b;
-            --bg-mid: #0e1630;
-            --bg-hot: #1b1543;
-            --neon-cyan: #72f1ff;
-            --neon-blue: #3fa4ff;
-            --neon-violet: #9ea6ff;
-            --text-main: #e8eeff;
-            --text-muted: #a0afcf;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
+        /* === 공통 UI 스타일 === */
         body {
+            background-color: #03050b;
+            color: #f8fafc;
+            font-family: 'Malgun Gothic', sans-serif;
             margin: 0;
-            width: 100%;
-            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1.main-title {
+            color: #0ea5e9;
+            margin-bottom: 15px;
+            font-family: "Orbitron", sans-serif;
+        }
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border: 2px solid #334155;
+            padding: 10px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+        button:hover { background-color: #334155; }
+        button.active {
+            background-color: #0ea5e9;
+            border-color: #0ea5e9;
+            color: white;
+            font-weight: bold;
+        }
+        #ui-container {
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0 10px;
+        }
+        .slider-label {
+            font-size: 15px;
+            color: #cbd5e1;
+        }
+        
+        /* === p5.js 캔버스 영역 === */
+        #canvas-container canvas {
+            border: 1px solid #334155;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            display: block;
+        }
+
+        /* === 4번째 탭(고해상도 번개) 전용 스타일 === */
+        #vanilla-container {
+            display: none; /* 기본적으로 숨김 */
+            width: 800px;
+            height: 600px;
+            border: 1px solid #334155;
+            border-radius: 8px;
             overflow: hidden;
             background: radial-gradient(circle at 18% 22%, #2a2355 0%, transparent 42%),
                         radial-gradient(circle at 82% 15%, #113a67 0%, transparent 38%),
                         radial-gradient(circle at 50% 100%, #0a223f 0%, transparent 35%),
-                        linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 55%, var(--bg-hot) 100%);
-            color: var(--text-main);
+                        linear-gradient(160deg, #03050b 0%, #0e1630 55%, #1b1543 100%);
             font-family: "Rajdhani", sans-serif;
-        }
-
-        .storm-wrap {
             position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+        
+        .storm-wrap {
+            position: absolute;
             width: 100%;
             height: 100%;
             isolation: isolate;
         }
 
-        canvas {
+        #vanilla-container canvas {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             display: block;
             cursor: crosshair;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
         }
 
         .aurora {
@@ -70,21 +130,21 @@
         .hud {
             position: absolute;
             left: 50%;
-            top: 6vh;
+            top: 20px;
             transform: translateX(-50%);
             text-align: center;
             z-index: 3;
             pointer-events: none;
             user-select: none;
-            width: min(88vw, 760px);
+            width: 90%;
         }
 
-        .hud h1 {
+        .hud h2 {
             margin: 0;
             font-family: "Orbitron", sans-serif;
             font-weight: 900;
-            font-size: clamp(2rem, 5vw, 4rem);
-            letter-spacing: 0.16em;
+            font-size: 2.2rem;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             color: #f4f8ff;
             text-shadow: 0 0 12px rgba(175, 213, 255, 0.9),
@@ -94,12 +154,10 @@
         }
 
         .hud p {
-            margin: 0.5rem auto 0;
-            font-size: clamp(0.95rem, 2vw, 1.28rem);
+            margin: 5px auto 0;
+            font-size: 1.1rem;
             font-weight: 600;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            max-width: 60ch;
+            color: #a0afcf;
         }
 
         .flash {
@@ -119,208 +177,323 @@
             z-index: 0;
             pointer-events: none;
             background-image:
-                linear-gradient(rgba(95, 117, 165, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(95, 117, 165, 0.1) 1px, transparent 1px);
-            background-size: 36px 36px;
+                linear-gradient(rgba(95, 117, 165, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(95, 117, 165, 0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
             mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
             animation: gridShift 15s linear infinite;
         }
 
         @keyframes drift {
-            0% {
-                transform: translate(-2%, -1%) scale(1);
-            }
-            100% {
-                transform: translate(2%, 2%) scale(1.08);
-            }
+            0% { transform: translate(-2%, -1%) scale(1); }
+            100% { transform: translate(2%, 2%) scale(1.08); }
         }
-
         @keyframes pulse {
-            0%,
-            100% {
-                filter: brightness(1);
-            }
-            50% {
-                filter: brightness(1.2);
-            }
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
         }
-
         @keyframes gridShift {
-            from {
-                transform: translate3d(0, 0, 0);
-            }
-            to {
-                transform: translate3d(36px, 36px, 0);
-            }
+            from { transform: translate3d(0, 0, 0); }
+            to { transform: translate3d(40px, 40px, 0); }
         }
     </style>
 </head>
 <body>
-    <div class="storm-wrap">
-        <div class="grid" aria-hidden="true"></div>
-        <div class="aurora" aria-hidden="true"></div>
-        <canvas id="storm" aria-label="Fractal lightning canvas"></canvas>
-        <div class="flash" id="flash" aria-hidden="true"></div>
 
-        <header class="hud">
-            <h1>Storm Fractal</h1>
-            <p>Click anywhere to summon branching lightning with recursive fractal arcs.</p>
-        </header>
+    <h1 class="main-title">FRACTAL PROJECT SHOWCASE</h1>
+    
+    <div class="tab-container">
+        <button id="btn1" onclick="setMode(1)">1. 차원 조작기 (수학+정보)</button>
+        <button id="btn2" onclick="setMode(2)">2. 바이오 생태계 (생명+정보)</button>
+        <button id="btn3" onclick="setMode(3)">3. 에너지 방전 모델 (물리+정보)</button>
+        <button id="btn4" onclick="setMode(4)">4. 심화: 고해상도 번개 시뮬레이터</button>
+    </div>
+
+    <div id="ui-container"></div>
+
+    <div id="canvas-container"></div>
+
+    <div id="vanilla-container">
+        <div class="storm-wrap">
+            <div class="grid" aria-hidden="true"></div>
+            <div class="aurora" aria-hidden="true"></div>
+            <canvas id="stormCanvas" aria-label="Fractal lightning canvas"></canvas>
+            <div class="flash" id="flashLayer" aria-hidden="true"></div>
+            <header class="hud">
+                <h2>Storm Fractal</h2>
+                <p>화면을 클릭하여 프랙탈 번개를 생성하세요.</p>
+            </header>
+        </div>
     </div>
 
     <script>
-        const canvas = document.getElementById("storm");
-        const flashLayer = document.getElementById("flash");
-        const ctx = canvas.getContext("2d");
+        // ==========================================
+        // 1. 공통 탭 제어 로직
+        // ==========================================
+        let currentMode = 1;
+        let isP5Active = true;
 
-        const bolts = [];
+        // p5.js 전용 변수
+        let depthSlider, angleSlider, lengthSlider;
+        let p5Bolts = [];
+
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // 버튼 활성화 스타일
+            for(let i=1; i<=4; i++) {
+                document.getElementById('btn' + i).classList.remove('active');
+            }
+            document.getElementById('btn' + mode).classList.add('active');
+
+            let uiContainer = document.getElementById('ui-container');
+            let p5Container = document.getElementById('canvas-container');
+            let vanillaContainer = document.getElementById('vanilla-container');
+
+            // 초기화
+            uiContainer.innerHTML = '';
+            
+            if(depthSlider) depthSlider.hide();
+            if(angleSlider) angleSlider.hide();
+            if(lengthSlider) lengthSlider.hide();
+
+            // 1~3번 탭 (p5.js 작동)
+            if (mode >= 1 && mode <= 3) {
+                p5Container.style.display = 'block';
+                vanillaContainer.style.display = 'none';
+                isP5Active = true;
+                if(typeof loop === 'function') loop(); // p5 루프 재개
+                
+                if (mode === 1) {
+                    let div = createDiv(''); div.class('slider-group');
+                    let label = createSpan('시어핀스키 세대 (n) : '); label.class('slider-label');
+                    label.parent(div); depthSlider.parent(div); div.parent('ui-container');
+                    depthSlider.show();
+                } else if (mode === 2) {
+                    let div1 = createDiv(''); div1.class('slider-group');
+                    let label1 = createSpan('빛의 각도 : '); label1.class('slider-label');
+                    label1.parent(div1); angleSlider.parent(div1); div1.parent('ui-container');
+                    
+                    let div2 = createDiv(''); div2.class('slider-group');
+                    let label2 = createSpan('생장 길이 : '); label2.class('slider-label');
+                    label2.parent(div2); lengthSlider.parent(div2); div2.parent('ui-container');
+                    
+                    angleSlider.show(); lengthSlider.show();
+                } else if (mode === 3) {
+                    let msg = createDiv('마우스로 캔버스를 클릭하여 DLA 알고리즘 에너지를 방전시키세요.');
+                    msg.style('color', '#0ea5e9').style('font-weight', 'bold');
+                    msg.parent('ui-container');
+                    p5Bolts = [];
+                }
+            } 
+            // 4번 탭 (Vanilla JS 작동)
+            else if (mode === 4) {
+                p5Container.style.display = 'none';
+                vanillaContainer.style.display = 'block';
+                isP5Active = false;
+                if(typeof noLoop === 'function') noLoop(); // p5 연산 정지 (최적화)
+                
+                let msg = createDiv('심화 시뮬레이션입니다. 아래 화면을 직접 클릭해보세요.');
+                msg.style('color', '#a855f7').style('font-weight', 'bold');
+                msg.parent('ui-container');
+            }
+        }
+
+        // ==========================================
+        // 2. p5.js 로직 (탭 1, 2, 3)
+        // ==========================================
+        function setup() {
+            let canvas = createCanvas(800, 600);
+            canvas.parent('canvas-container');
+
+            depthSlider = createSlider(1, 8, 1);
+            angleSlider = createSlider(0, Math.PI / 2, Math.PI / 4, 0.01);
+            lengthSlider = createSlider(50, 200, 120);
+
+            setMode(1);
+        }
+
+        function draw() {
+            if (!isP5Active) return;
+            
+            if (currentMode === 1) drawMode1();
+            else if (currentMode === 2) drawMode2();
+            else if (currentMode === 3) drawMode3();
+        }
+
+        // --- 탭 1 ---
+        function drawMode1() {
+            background(15, 23, 42);
+            fill(255); noStroke(); textSize(18); textAlign(LEFT, TOP);
+            text("현재 세대: " + depthSlider.value(), 20, 20);
+            
+            let p1 = createVector(width / 2, 50);
+            let p2 = createVector(50, height - 50);
+            let p3 = createVector(width - 50, height - 50);
+            
+            fill(14, 165, 233, 120); stroke(14, 165, 233);
+            drawSierpinski(p1, p2, p3, depthSlider.value());
+        }
+        function drawSierpinski(a, b, c, depth) {
+            if (depth === 1) { triangle(a.x, a.y, b.x, b.y, c.x, c.y); } 
+            else {
+                let ab = p5.Vector.lerp(a, b, 0.5), bc = p5.Vector.lerp(b, c, 0.5), ca = p5.Vector.lerp(c, a, 0.5);
+                drawSierpinski(a, ab, ca, depth - 1); drawSierpinski(ab, b, bc, depth - 1); drawSierpinski(ca, bc, c, depth - 1);
+            }
+        }
+
+        // --- 탭 2 ---
+        function drawMode2() {
+            background(15, 23, 42);
+            fill(255); noStroke(); textSize(18); textAlign(LEFT, TOP);
+            text("분기 각도: " + degrees(angleSlider.value()).toFixed(1) + "°", 20, 20);
+            
+            stroke(34, 197, 94);
+            push(); translate(width / 2, height); branch(lengthSlider.value()); pop();
+        }
+        function branch(len) {
+            strokeWeight(map(len, 10, 200, 1, 12)); line(0, 0, 0, -len); translate(0, -len);
+            if (len > 4) {
+                push(); rotate(angleSlider.value()); branch(len * 0.67); pop();
+                push(); rotate(-angleSlider.value()); branch(len * 0.67); pop();
+            }
+        }
+
+        // --- 탭 3 ---
+        function drawMode3() {
+            background(15, 23, 42, 30);
+            for (let b of p5Bolts) { b.update(); b.show(); }
+        }
+        function mousePressed() {
+            if (currentMode === 3 && isP5Active && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                p5Bolts.push(new P5Lightning(mouseX, mouseY, random(-PI, PI), 12));
+            }
+        }
+        class P5Lightning {
+            constructor(x, y, angle, thickness) {
+                this.pos = createVector(x, y); this.angle = angle; this.thickness = thickness; this.active = true;
+                this.col = color(random(150, 255), random(150, 255), 255);
+            }
+            update() {
+                if (!this.active) return;
+                let step = p5.Vector.fromAngle(this.angle); step.mult(random(8, 20));
+                let nextPos = p5.Vector.add(this.pos, step);
+                if (nextPos.x < 0 || nextPos.x > width || nextPos.y < 0 || nextPos.y > height || this.thickness < 1) this.active = false;
+                if (random(1) < 0.25) { 
+                    p5Bolts.push(new P5Lightning(this.pos.x, this.pos.y, this.angle + random(-PI/3, PI/3), this.thickness * 0.7));
+                }
+                this.pos = nextPos; this.thickness *= 0.92;
+            }
+            show() {
+                if (!this.active) return;
+                stroke(this.col); strokeWeight(this.thickness); point(this.pos.x, this.pos.y);
+            }
+        }
+
+        // ==========================================
+        // 3. 고해상도 번개 로직 (탭 4 - Vanilla JS)
+        // ==========================================
+        const vCanvas = document.getElementById("stormCanvas");
+        const flashLayer = document.getElementById("flashLayer");
+        const ctx = vCanvas.getContext("2d");
+
+        const advancedBolts = [];
         const sparks = [];
         const stars = [];
 
-        let width = 0;
-        let height = 0;
+        let vWidth = 800; // p5 캔버스와 동일한 고정 크기
+        let vHeight = 600;
         let dpr = Math.min(window.devicePixelRatio || 1, 2);
         let flashEnergy = 0;
         let lastTime = performance.now();
 
-        function random(min, max) {
-            return Math.random() * (max - min) + min;
-        }
+        function vRandom(min, max) { return Math.random() * (max - min) + min; }
 
-        function resize() {
-            dpr = Math.min(window.devicePixelRatio || 1, 2);
-            width = window.innerWidth;
-            height = window.innerHeight;
-
-            canvas.width = Math.floor(width * dpr);
-            canvas.height = Math.floor(height * dpr);
+        function initVanillaCanvas() {
+            vCanvas.width = Math.floor(vWidth * dpr);
+            vCanvas.height = Math.floor(vHeight * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
             stars.length = 0;
-            const starCount = Math.max(40, Math.floor((width * height) / 12000));
-            for (let i = 0; i < starCount; i += 1) {
+            const starCount = 40;
+            for (let i = 0; i < starCount; i++) {
                 stars.push({
-                    x: random(0, width),
-                    y: random(0, height),
-                    r: random(0.4, 1.8),
-                    twinkle: random(0.6, 1.2),
-                    phase: random(0, Math.PI * 2)
+                    x: vRandom(0, vWidth), y: vRandom(0, vHeight), r: vRandom(0.4, 1.8),
+                    twinkle: vRandom(0.6, 1.2), phase: vRandom(0, Math.PI * 2)
                 });
             }
         }
 
         function displaceSegment(start, end, displacement, iterations) {
             let points = [start, end];
-            for (let i = 0; i < iterations; i += 1) {
+            for (let i = 0; i < iterations; i++) {
                 const next = [points[0]];
-                for (let p = 0; p < points.length - 1; p += 1) {
-                    const a = points[p];
-                    const b = points[p + 1];
-                    const midX = (a.x + b.x) * 0.5;
-                    const midY = (a.y + b.y) * 0.5;
-
-                    const dx = b.x - a.x;
-                    const dy = b.y - a.y;
+                for (let p = 0; p < points.length - 1; p++) {
+                    const a = points[p], b = points[p + 1];
+                    const midX = (a.x + b.x) * 0.5, midY = (a.y + b.y) * 0.5;
+                    const dx = b.x - a.x, dy = b.y - a.y;
                     const len = Math.hypot(dx, dy) || 1;
-                    const nx = -dy / len;
-                    const ny = dx / len;
-                    const offset = random(-displacement, displacement);
-
+                    const nx = -dy / len, ny = dx / len;
+                    const offset = vRandom(-displacement, displacement);
                     next.push({ x: midX + nx * offset, y: midY + ny * offset });
                     next.push(b);
                 }
-                points = next;
-                displacement *= 0.58;
+                points = next; displacement *= 0.58;
             }
             return points;
         }
 
         function createFractalBolt(from, to, options = {}) {
-            const life = options.life ?? random(360, 620);
-            const widthBase = options.widthBase ?? random(1.8, 3.4);
-            const hue = options.hue ?? random(195, 230);
+            const life = options.life ?? vRandom(360, 620);
+            const widthBase = options.widthBase ?? vRandom(1.8, 3.4);
+            const hue = options.hue ?? vRandom(195, 230);
             const iterations = options.iterations ?? 5;
             const displacement = options.displacement ?? Math.hypot(to.x - from.x, to.y - from.y) * 0.16;
-
             const root = displaceSegment(from, to, displacement, iterations);
             const branches = [];
-
-            const branchCount = options.branchCount ?? Math.floor(random(3, 7));
-            for (let i = 0; i < branchCount; i += 1) {
-                const anchorIndex = Math.floor(random(root.length * 0.2, root.length * 0.9));
+            const branchCount = options.branchCount ?? Math.floor(vRandom(3, 7));
+            
+            for (let i = 0; i < branchCount; i++) {
+                const anchorIndex = Math.floor(vRandom(root.length * 0.2, root.length * 0.9));
                 const anchor = root[anchorIndex];
-                if (!anchor) {
-                    continue;
-                }
-
-                const angle = random(-Math.PI * 0.95, Math.PI * 0.15);
-                const branchLength = random(50, 180) * (1 - i / (branchCount + 2));
-                const branchEnd = {
-                    x: anchor.x + Math.cos(angle) * branchLength,
-                    y: anchor.y + Math.sin(angle) * branchLength
-                };
-
+                if (!anchor) continue;
+                const angle = vRandom(-Math.PI * 0.95, Math.PI * 0.15);
+                const branchLength = vRandom(50, 180) * (1 - i / (branchCount + 2));
+                const branchEnd = { x: anchor.x + Math.cos(angle) * branchLength, y: anchor.y + Math.sin(angle) * branchLength };
                 branches.push({
                     points: displaceSegment(anchor, branchEnd, branchLength * 0.25, 3),
-                    width: widthBase * random(0.35, 0.6)
+                    width: widthBase * vRandom(0.35, 0.6)
                 });
             }
-
-            return {
-                points: root,
-                branches,
-                born: performance.now(),
-                life,
-                widthBase,
-                hue,
-                seed: Math.random() * 1000
-            };
+            return { points: root, branches, born: performance.now(), life, widthBase, hue, seed: Math.random() * 1000 };
         }
 
         function spawnSparks(x, y, amount = 30) {
-            for (let i = 0; i < amount; i += 1) {
-                const angle = random(0, Math.PI * 2);
-                const speed = random(40, 340);
+            for (let i = 0; i < amount; i++) {
+                const angle = vRandom(0, Math.PI * 2); const speed = vRandom(40, 340);
                 sparks.push({
-                    x,
-                    y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    life: random(260, 680),
-                    age: 0,
-                    size: random(1, 2.8),
-                    hue: random(190, 220)
+                    x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    life: vRandom(260, 680), age: 0, size: vRandom(1, 2.8), hue: vRandom(190, 220)
                 });
             }
         }
 
         function linePath(points, progress = 1) {
-            if (points.length < 2) {
-                return;
-            }
-
+            if (points.length < 2) return;
             const maxIndex = Math.floor((points.length - 1) * progress);
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
-            for (let i = 1; i <= maxIndex; i += 1) {
-                const p = points[i];
-                ctx.lineTo(p.x, p.y);
-            }
-
+            ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i <= maxIndex; i++) ctx.lineTo(points[i].x, points[i].y);
             const frac = (points.length - 1) * progress - maxIndex;
             if (frac > 0 && maxIndex + 1 < points.length) {
-                const a = points[maxIndex];
-                const b = points[maxIndex + 1];
+                const a = points[maxIndex], b = points[maxIndex + 1];
                 ctx.lineTo(a.x + (b.x - a.x) * frac, a.y + (b.y - a.y) * frac);
             }
         }
 
-        function renderBolt(bolt, now) {
+        function renderAdvancedBolt(bolt, now) {
             const age = now - bolt.born;
-            if (age > bolt.life) {
-                return false;
-            }
-
+            if (age > bolt.life) return false;
             const lifeT = age / bolt.life;
             const fade = 1 - lifeT;
             const reveal = Math.min(1, lifeT * 2.8 + 0.1);
@@ -328,51 +501,32 @@
             const alpha = fade * flicker;
 
             ctx.globalCompositeOperation = "lighter";
-            ctx.shadowBlur = 26;
-            ctx.shadowColor = `hsla(${bolt.hue}, 100%, 70%, ${alpha})`;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
+            ctx.shadowBlur = 26; ctx.shadowColor = `hsla(${bolt.hue}, 100%, 70%, ${alpha})`;
+            ctx.lineCap = "round"; ctx.lineJoin = "round";
 
             linePath(bolt.points, reveal);
-            ctx.strokeStyle = `hsla(${bolt.hue}, 100%, 76%, ${alpha * 0.95})`;
-            ctx.lineWidth = bolt.widthBase * 2.1;
-            ctx.stroke();
+            ctx.strokeStyle = `hsla(${bolt.hue}, 100%, 76%, ${alpha * 0.95})`; ctx.lineWidth = bolt.widthBase * 2.1; ctx.stroke();
 
             linePath(bolt.points, reveal);
-            ctx.strokeStyle = `hsla(${bolt.hue + 6}, 100%, 94%, ${Math.min(1, alpha + 0.08)})`;
-            ctx.lineWidth = bolt.widthBase * 0.9;
-            ctx.stroke();
+            ctx.strokeStyle = `hsla(${bolt.hue + 6}, 100%, 94%, ${Math.min(1, alpha + 0.08)})`; ctx.lineWidth = bolt.widthBase * 0.9; ctx.stroke();
 
             for (const branch of bolt.branches) {
                 linePath(branch.points, reveal * 1.05);
-                ctx.strokeStyle = `hsla(${bolt.hue + 14}, 100%, 84%, ${alpha * 0.76})`;
-                ctx.lineWidth = branch.width;
-                ctx.stroke();
+                ctx.strokeStyle = `hsla(${bolt.hue + 14}, 100%, 84%, ${alpha * 0.76})`; ctx.lineWidth = branch.width; ctx.stroke();
             }
-
             flashEnergy = Math.max(flashEnergy, alpha * 0.95);
             return true;
         }
 
         function renderSparks(dt) {
-            for (let i = sparks.length - 1; i >= 0; i -= 1) {
-                const s = sparks[i];
-                s.age += dt;
-                if (s.age > s.life) {
-                    sparks.splice(i, 1);
-                    continue;
-                }
-
-                s.x += s.vx * (dt / 1000);
-                s.y += s.vy * (dt / 1000);
-                s.vx *= 0.986;
-                s.vy = s.vy * 0.986 + 380 * (dt / 1000);
-
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const s = sparks[i]; s.age += dt;
+                if (s.age > s.life) { sparks.splice(i, 1); continue; }
+                s.x += s.vx * (dt / 1000); s.y += s.vy * (dt / 1000);
+                s.vx *= 0.986; s.vy = s.vy * 0.986 + 380 * (dt / 1000);
                 const t = 1 - s.age / s.life;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size * t, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${s.hue}, 100%, 74%, ${t * 0.9})`;
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.size * t, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${s.hue}, 100%, 74%, ${t * 0.9})`; ctx.fill();
             }
         }
 
@@ -380,84 +534,81 @@
             ctx.globalCompositeOperation = "source-over";
             for (const star of stars) {
                 const twinkle = 0.45 + Math.sin(now * 0.0018 * star.twinkle + star.phase) * 0.35;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.r * twinkle, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(176, 212, 255, ${0.22 + twinkle * 0.32})`;
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(star.x, star.y, star.r * twinkle, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(176, 212, 255, ${0.22 + twinkle * 0.32})`; ctx.fill();
             }
         }
 
-        function animate(now) {
+        function animateVanilla(now) {
+            requestAnimationFrame(animateVanilla);
+            
+            // 탭4 활성화일때만 렌더링 최적화
+            if (currentMode !== 4) return;
+
             const dt = Math.min(34, now - lastTime || 16);
             lastTime = now;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, vWidth, vHeight);
             renderStars(now);
 
-            for (let i = bolts.length - 1; i >= 0; i -= 1) {
-                const alive = renderBolt(bolts[i], now);
-                if (!alive) {
-                    bolts.splice(i, 1);
-                }
+            for (let i = advancedBolts.length - 1; i >= 0; i--) {
+                const alive = renderAdvancedBolt(advancedBolts[i], now);
+                if (!alive) advancedBolts.splice(i, 1);
             }
-
             renderSparks(dt);
-
+            
             flashEnergy *= 0.88;
             flashLayer.style.opacity = String(Math.min(0.95, flashEnergy));
-
-            requestAnimationFrame(animate);
         }
 
-        function strike(x, y) {
-            const start = { x: x + random(-50, 50), y: random(-50, 30) };
+        function strikeAdvanced(x, y) {
+            const start = { x: x + vRandom(-50, 50), y: vRandom(-50, 30) };
             const end = { x, y };
             const primary = createFractalBolt(start, end, {
-                branchCount: Math.floor(random(5, 9)),
-                widthBase: random(2.3, 4.1),
-                life: random(440, 760),
-                iterations: 6
+                branchCount: Math.floor(vRandom(5, 9)), widthBase: vRandom(2.3, 4.1), life: vRandom(440, 760), iterations: 6
             });
-            bolts.push(primary);
+            advancedBolts.push(primary);
 
-            const echoCount = Math.floor(random(1, 3));
-            for (let i = 0; i < echoCount; i += 1) {
-                const delay = i * random(28, 64);
+            const echoCount = Math.floor(vRandom(1, 3));
+            for (let i = 0; i < echoCount; i++) {
+                const delay = i * vRandom(28, 64);
                 setTimeout(() => {
-                    bolts.push(createFractalBolt(
-                        { x: start.x + random(-60, 60), y: start.y + random(-10, 40) },
-                        { x: end.x + random(-80, 80), y: end.y + random(-45, 35) },
-                        {
-                            branchCount: Math.floor(random(3, 6)),
-                            widthBase: random(1.4, 2.8),
-                            life: random(260, 420),
-                            iterations: 4,
-                            hue: random(188, 216)
-                        }
+                    advancedBolts.push(createFractalBolt(
+                        { x: start.x + vRandom(-60, 60), y: start.y + vRandom(-10, 40) },
+                        { x: end.x + vRandom(-80, 80), y: end.y + vRandom(-45, 35) },
+                        { branchCount: Math.floor(vRandom(3, 6)), widthBase: vRandom(1.4, 2.8), life: vRandom(260, 420), iterations: 4, hue: vRandom(188, 216) }
                     ));
                 }, delay);
             }
 
-            flashLayer.style.setProperty("--x", `${(x / width) * 100}%`);
-            flashLayer.style.setProperty("--y", `${(y / height) * 100}%`);
+            flashLayer.style.setProperty("--x", `${(x / vWidth) * 100}%`);
+            flashLayer.style.setProperty("--y", `${(y / vHeight) * 100}%`);
             flashEnergy = Math.min(1, flashEnergy + 0.9);
-            spawnSparks(x, y, Math.floor(random(26, 42)));
+            spawnSparks(x, y, Math.floor(vRandom(26, 42)));
         }
 
-        canvas.addEventListener("pointerdown", (event) => {
-            strike(event.clientX, event.clientY);
+        vCanvas.addEventListener("pointerdown", (event) => {
+            if (currentMode === 4) {
+                const rect = vCanvas.getBoundingClientRect();
+                const scaleX = vCanvas.width / rect.width / dpr;
+                const scaleY = vCanvas.height / rect.height / dpr;
+                strikeAdvanced((event.clientX - rect.left) * scaleX, (event.clientY - rect.top) * scaleY);
+            }
         });
 
-        window.addEventListener("resize", resize);
-        resize();
+        // 초기화 및 루프 실행
+        initVanillaCanvas();
+        requestAnimationFrame(animateVanilla);
 
-        for (let i = 0; i < 3; i += 1) {
-            setTimeout(() => {
-                strike(random(width * 0.15, width * 0.85), random(height * 0.22, height * 0.88));
-            }, i * 240);
-        }
-
-        requestAnimationFrame(animate);
+        // 첫 등장 시 자동 시연 타격 3번
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    strikeAdvanced(vRandom(vWidth * 0.15, vWidth * 0.85), vRandom(vHeight * 0.22, vHeight * 0.88));
+                }, i * 240);
+            }
+        }, 500);
+        
     </script>
 </body>
 </html>
