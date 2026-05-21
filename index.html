@@ -3,612 +3,496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프랙탈 프로젝트 융합 산출물 통합 예제</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <title>자연과 디지털의 연결고리, 프랙탈</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* === 공통 UI 스타일 === */
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --accent-cyan: #0ea5e9;
+            --accent-green: #22c55e;
+            --accent-purple: #a855f7;
+            --accent-yellow: #fcd34d;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: #03050b;
-            color: #f8fafc;
-            font-family: 'Malgun Gothic', sans-serif;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.08), transparent 50%),
+                              radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 50%);
+        }
+
+        #slides-container {
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            background: var(--bg-dark);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateX(50px);
+            pointer-events: none;
             display: flex;
             flex-direction: column;
-            align-items: center;
-        }
-        h1.main-title {
-            color: #0ea5e9;
-            margin-bottom: 15px;
-            font-family: "Orbitron", sans-serif;
-        }
-        .tab-container {
-            display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        h1 {
+            font-family: 'Orbitron', 'Noto Sans KR', sans-serif;
+            font-size: 56px;
+            color: var(--accent-cyan);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 40px;
+            color: var(--accent-cyan);
+            border-bottom: 2px solid var(--accent-cyan);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 26px;
+            color: var(--accent-green);
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 22px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            padding-left: 30px;
             margin-bottom: 20px;
         }
-        button {
-            background-color: #1e293b;
-            color: #e2e8f0;
-            border: 2px solid #334155;
-            padding: 10px 20px;
-            font-size: 15px;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s;
-            font-family: 'Malgun Gothic', sans-serif;
-        }
-        button:hover { background-color: #334155; }
-        button.active {
-            background-color: #0ea5e9;
-            border-color: #0ea5e9;
-            color: white;
-            font-weight: bold;
-        }
-        #ui-container {
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 0 10px;
-        }
-        .slider-label {
-            font-size: 15px;
+
+        li {
+            font-size: 20px;
+            line-height: 1.6;
             color: #cbd5e1;
+            margin-bottom: 12px;
         }
-        
-        /* === p5.js 캔버스 영역 === */
-        #canvas-container canvas {
+
+        .quote {
+            font-size: 24px;
+            font-style: italic;
+            color: var(--accent-yellow);
+            border-left: 5px solid var(--accent-yellow);
+            padding-left: 20px;
+            margin: 20px 0;
+            background: rgba(252, 211, 77, 0.05);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.6;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 10px; }
+
+        .box {
+            background: var(--bg-panel);
+            padding: 30px;
+            border-radius: 12px;
+            border-top: 4px solid var(--accent-purple);
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 10px;
             border: 1px solid #334155;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            display: block;
+            margin-bottom: 15px;
         }
 
-        /* === 4번째 탭(고해상도 번개) 전용 스타일 === */
-        #vanilla-container {
-            display: none; /* 기본적으로 숨김 */
-            width: 800px;
-            height: 600px;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            overflow: hidden;
-            background: radial-gradient(circle at 18% 22%, #2a2355 0%, transparent 42%),
-                        radial-gradient(circle at 82% 15%, #113a67 0%, transparent 38%),
-                        radial-gradient(circle at 50% 100%, #0a223f 0%, transparent 35%),
-                        linear-gradient(160deg, #03050b 0%, #0e1630 55%, #1b1543 100%);
-            font-family: "Rajdhani", sans-serif;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-        }
-        
-        .storm-wrap {
+        .highlight { color: var(--accent-cyan); font-weight: bold; }
+        .highlight-green { color: var(--accent-green); font-weight: bold; }
+
+        a { transition: opacity 0.2s; }
+        a:hover { opacity: 0.8; text-decoration: underline !important; }
+
+        /* Controls */
+        .controls {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            isolation: isolate;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
         }
 
-        #vanilla-container canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            cursor: crosshair;
-            border: none;
-            box-shadow: none;
-            border-radius: 0;
+        .btn {
+            background: var(--bg-panel);
+            color: white;
+            border: 1px solid #475569;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
-        .aurora {
-            position: absolute;
-            inset: -20%;
-            background:
-                radial-gradient(circle at 20% 35%, rgba(65, 183, 255, 0.32) 0%, rgba(65, 183, 255, 0) 35%),
-                radial-gradient(circle at 80% 65%, rgba(150, 114, 255, 0.28) 0%, rgba(150, 114, 255, 0) 33%),
-                radial-gradient(circle at 50% 80%, rgba(85, 255, 240, 0.24) 0%, rgba(85, 255, 240, 0) 40%);
-            filter: blur(54px) saturate(130%);
-            mix-blend-mode: screen;
-            animation: drift 12s ease-in-out infinite alternate;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .hud {
-            position: absolute;
-            left: 50%;
-            top: 20px;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 3;
-            pointer-events: none;
-            user-select: none;
-            width: 90%;
-        }
-
-        .hud h2 {
-            margin: 0;
-            font-family: "Orbitron", sans-serif;
-            font-weight: 900;
-            font-size: 2.2rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #f4f8ff;
-            text-shadow: 0 0 12px rgba(175, 213, 255, 0.9),
-                         0 0 30px rgba(76, 156, 255, 0.65),
-                         0 0 58px rgba(124, 109, 255, 0.45);
-            animation: pulse 2.8s ease-in-out infinite;
-        }
-
-        .hud p {
-            margin: 5px auto 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #a0afcf;
-        }
-
-        .flash {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at var(--x, 50%) var(--y, 40%), rgba(170, 221, 255, 0.34) 0%, rgba(170, 221, 255, 0.07) 30%, transparent 65%);
-            mix-blend-mode: screen;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 2;
-            transition: opacity 160ms ease-out;
-        }
-
-        .grid {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            background-image:
-                linear-gradient(rgba(95, 117, 165, 0.15) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(95, 117, 165, 0.15) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
-            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
-            animation: gridShift 15s linear infinite;
-        }
-
-        @keyframes drift {
-            0% { transform: translate(-2%, -1%) scale(1); }
-            100% { transform: translate(2%, 2%) scale(1.08); }
-        }
-        @keyframes pulse {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.2); }
-        }
-        @keyframes gridShift {
-            from { transform: translate3d(0, 0, 0); }
-            to { transform: translate3d(40px, 40px, 0); }
-        }
+        .btn:hover { background: var(--accent-cyan); border-color: var(--accent-cyan); }
+        .progress-bar { position: absolute; bottom: 0; left: 0; height: 6px; background: var(--accent-cyan); transition: width 0.3s ease; }
+        .slide-number { position: absolute; bottom: 45px; left: 40px; color: var(--text-muted); font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1 class="main-title">FRACTAL PROJECT SHOWCASE</h1>
-    
-    <div class="tab-container">
-        <button id="btn1" onclick="setMode(1)">1. 차원 조작기 (수학+정보)</button>
-        <button id="btn2" onclick="setMode(2)">2. 바이오 생태계 (생명+정보)</button>
-        <button id="btn3" onclick="setMode(3)">3. 에너지 방전 모델 (물리+정보)</button>
-        <button id="btn4" onclick="setMode(4)">4. 번개 시뮬레이터</button>
-    </div>
+    <div id="slides-container">
+        
+        <div class="slide active">
+            <h3 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">FRACTAL ALCHEMY</h3>
+            <h1 style="font-size: 64px;">자연과 디지털의 연결고리,<br>프랙탈</h1>
+            <p style="font-size: 32px; color: var(--text-main); font-weight: 300;">무한한 반복으로 설계하는 새로운 세상</p>
+            <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #334155;">
+                <p style="color: var(--accent-cyan); font-weight: bold; font-size: 24px;">고등학교 프로젝트 활동 안내 및 계획서 작성 가이드</p>
+            </div>
+        </div>
 
-    <div id="ui-container"></div>
+        <div class="slide">
+            <h2>거대한 우주부터 미시 세계까지, 세상을 지배하는 하나의 암호</h2>
+            <p><strong>자기 유사성(Self-Similarity):</strong> 부분과 전체가 같은 모양으로 무한히 반복되는 성질.</p>
+            <p>자연은 가장 효율적인 방식으로 자신을 복제하며 세계를 구축합니다. 우리는 이 숨겨진 규칙을 <strong>'프랙탈(Fractal)'</strong>이라 부릅니다.</p>
+            <div class="quote" style="margin-top: 40px;">
+                "자의 길이가 줄어들수록 유한한 해안선의 길이는 무한하게 늘어난다." <br>
+                <span style="font-size: 20px; color: var(--text-muted);">- 만델브로(Mandelbrot)</span>
+            </div>
+        </div>
 
-    <div id="canvas-container"></div>
+        <div class="slide">
+            <h2>화학과 생명과학 : 분자 구조에 숨겨진 자연의 최적화</h2>
+            <div class="grid-2">
+                <div class="box" style="border-top-color: var(--accent-green);">
+                    <h3>[생명과학] 남조류 구연산 합성 효소의 진화</h3>
+                    <ul>
+                        <li>자연 상태에서 시어핀스키 삼각형 구조(레벨 1, 2)로 자가 조립.</li>
+                        <li>단순한 기하학이 아닌, 생화학적 피드백 조절과 효소 활성화를 위한 자연의 '진화적 선택'.</li>
+                    </ul>
+                </div>
+                <div class="box" style="border-top-color: var(--accent-cyan);">
+                    <h3>[화학] 나노 구조체, 덴드리머(Dendrimer)</h3>
+                    <ul>
+                        <li>반복적인 확장을 통해 세대(Generation)를 거듭하며 성장하는 분자.</li>
+                        <li>약물 전달 및 정밀 센서에 활용되는 인공 프랙탈 화학의 정수.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-    <div id="vanilla-container">
-        <div class="storm-wrap">
-            <div class="grid" aria-hidden="true"></div>
-            <div class="aurora" aria-hidden="true"></div>
-            <canvas id="stormCanvas" aria-label="Fractal lightning canvas"></canvas>
-            <div class="flash" id="flashLayer" aria-hidden="true"></div>
-            <header class="hud">
-                <h2>Storm Fractal</h2>
-               
-            </header>
+        <div class="slide">
+            <h2>유한한 공간 속 무한한 세상, 수학으로 통제하다</h2>
+            <div class="grid-2" style="margin-bottom: 30px;">
+                <div class="panel">
+                    <h3 style="color: var(--accent-yellow);">[시어핀스키 삼각형]</h3>
+                    <p style="font-size: 18px;">$n=1 \rightarrow n=2 \rightarrow n=3$</p>
+                    <p>넓이는 0에 수렴하지만, 길이는 무한대가 되는 반복의 마법.</p>
+                </div>
+                <div class="panel">
+                    <h3 style="color: var(--accent-yellow);">[코흐 눈송이]</h3>
+                    <p style="font-size: 18px;">$n=1 \rightarrow n=2 \rightarrow n=3$</p>
+                    <p>변의 길이가 무한히 늘어나는 1.262 차원의 역설.</p>
+                </div>
+            </div>
+            <p style="color: var(--accent-cyan); font-weight: bold; text-align: center; font-size: 24px;">수학은 이 무한하고 복잡한 자연의 패턴을 알고리즘으로 분해하고,<br>코드로 통제할 수 있게 해주는 '결정적 언어'입니다.</p>
+        </div>
+
+        <div class="slide">
+            <h2>관찰자를 넘어 창조주로 : 여러분의 미션</h2>
+            <div class="quote" style="border-left-color: var(--accent-cyan); color: #f8fafc;">
+                "작은 조각 속에 전체의 모습이 숨어 있는 신기한 패턴, 프랙탈.<br>
+                우리 주변의 숨은 규칙을 AI와 함께 해석하고<br>
+                인터랙티브하게 표현하여 모두와 공유합시다."
+            </div>
+            <p style="text-align: center; margin-top: 40px; font-size: 26px;">
+                자연의 숨은 규칙을 수학·과학적으로 해석하고,<br>
+                AI와 상상력을 더해, <span class="highlight">코드로 환경을 통제하는 '나만의 새로운 생태계'</span>를 만드세요.
+            </p>
+        </div>
+
+        <div class="slide">
+            <h2>프로젝트 수행 로드맵 (3단계 확장 모델)</h2>
+            <div class="grid-3" style="margin-top: 40px;">
+                <div class="box" style="border-top-color: var(--text-muted);">
+                    <h3 style="color: var(--text-main);">1. 기본 탐구</h3>
+                    <p style="font-size: 18px; color: var(--accent-cyan); margin-bottom: 10px;">(규칙의 발견)</p>
+                    <p style="font-size: 18px;">발견된 반복적 규칙을 수학적/과학적으로 조사 및 분석.</p>
+                </div>
+                <div class="box" style="border-top-color: var(--accent-purple);">
+                    <h3 style="color: var(--accent-purple);">2. 상상하기</h3>
+                    <p style="font-size: 18px; color: var(--accent-cyan); margin-bottom: 10px;">(대안적 모델링)</p>
+                    <p style="font-size: 18px;">"만약 환경이 바뀐다면?" 질문을 던지고 AI와 토론.</p>
+                </div>
+                <div class="box" style="border-top-color: var(--accent-green);">
+                    <h3 style="color: var(--accent-green);">3. 표현하기</h3>
+                    <p style="font-size: 18px; color: var(--accent-cyan); margin-bottom: 10px;">(인터랙티브 구현)</p>
+                    <p style="font-size: 18px;">코드를 활용해 실시간으로 변수가 조작되는 시뮬레이션 앱 제작.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Step 1. 기본 탐구 : 규칙의 알고리즘화</h2>
+            <div class="grid-3">
+                <div class="panel">
+                    <h3 style="font-size: 22px;">[수학 + 생물]</h3>
+                    <p style="font-size: 18px;">L-System과 식물의 분기 구조.</p>
+                    <p style="font-size: 18px; color: var(--text-muted);">가지치기 규칙이 햇빛 수용 효율을 어떻게 극대화하는가?</p>
+                </div>
+                <div class="panel">
+                    <h3 style="font-size: 22px;">[수학 + 물리]</h3>
+                    <p style="font-size: 18px;">DLA(확산 제한 응집)와 리히텐베르크 도형.</p>
+                    <p style="font-size: 18px; color: var(--text-muted);">번개가 저항이 적은 최적의 경로를 찾아가는 원리.</p>
+                </div>
+                <div class="panel">
+                    <h3 style="font-size: 22px;">[수학 + 화학]</h3>
+                    <p style="font-size: 18px;">프랙탈 차원(1.262)과 탄화수소(알케인) 구조 분석.</p>
+                    <p style="font-size: 18px; color: var(--text-muted);">유기 화합물의 지그재그 선형 구조 복잡도 도출.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Step 2. 상상하기 : 질문과 AI의 결합</h2>
+            <p>자연의 기존 규칙을 벗어나, 환경 변수를 비틀어보는 융합적 사고를 시작하세요.</p>
+            <div class="box" style="margin-top: 20px; background: rgba(14, 165, 233, 0.05);">
+                <p style="font-weight: bold; color: var(--accent-cyan);">Q. 만약 이 식물(L-System)이 중력이 전혀 없는 우주나, 빛이 한 방향에서만 극단적으로 비추는 행성에서 자란다면 형태가 어떻게 바뀔까?</p>
+                <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+                <p style="font-weight: bold; color: var(--accent-purple);">Q. 만약 번개(DLA)가 공기 저항이 아닌 소음 에너지의 밀도를 따라 방전되도록 설계한다면 어떤 시각적 패턴이 나올까?</p>
+            </div>
+            <p style="margin-top: 20px; font-size: 20px; text-align: center;">
+                <span class="highlight-green">AI (Claude, Gemini 등)</span>를 아이디어 발상 파트너로 활용하여 논리적인 대안 환경 모델을 구축하세요.
+            </p>
+        </div>
+
+        <div class="slide">
+            <h2>Step 3. 표현하기 : 관찰을 넘어 '조작'의 영역으로</h2>
+            <div class="grid-2">
+                <div class="box" style="border-top-color: var(--accent-red); opacity: 0.6;">
+                    <h3 style="color: var(--accent-red);">[기존의 산출물]</h3>
+                    <ul>
+                        <li><strong>관람객의 역할:</strong> 수동적 관찰자 / 감상</li>
+                        <li><strong>산출물 형태:</strong> 정적인 프랙탈 그림, 발표용 PPT</li>
+                        <li><strong>결과물:</strong> 고정된 하나의 결과값</li>
+                    </ul>
+                </div>
+                <div class="box" style="border-top-color: var(--accent-cyan);">
+                    <h3 style="color: var(--accent-cyan);">[우리의 목표 산출물]</h3>
+                    <ul>
+                        <li><strong>관람객의 역할:</strong> 능동적 참여자 / 창조주</li>
+                        <li><strong>산출물 형태:</strong> 환경 변수를 통제하는 인터랙티브 웹앱/파이게임</li>
+                        <li><strong>결과물:</strong> 변수(슬라이더) 조작에 따라 실시간으로 변화하는 무한한 결과값</li>
+                    </ul>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 20px; font-weight: bold;">결과를 단순히 보여주는 것에 그치지 마세요. 관람객이 직접 통제하게 만드세요.</p>
+        </div>
+
+        <div class="slide">
+            <h2>[산출물 예시 1] 차원 조작기 (수학 + 정보)</h2>
+            <p>유한한 면적에서 무한한 길이가 생성되는 수학적 역설을 실시간으로 조작하는 웹앱.</p>
+            <div class="panel" style="margin-top: 20px;">
+                <h3 style="font-size: 20px; color: var(--text-main);">Control Panel (UI 변수)</h3>
+                <ul>
+                    <li><strong>성장 세대(n) 조절:</strong> 1세대 ~ 10세대 슬라이더</li>
+                    <li><strong>분할 각도 조절:</strong> 60도 ~ 120도 슬라이더</li>
+                    <li><strong>넓이 색상 채우기:</strong> On/Off 토글 버튼</li>
+                </ul>
+                <p style="color: var(--accent-cyan); font-weight: bold; margin-top: 15px;">→ 관람객이 n세대를 직접 늘려가며 프랙탈 차원의 복잡성을 직관적으로 체험.</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>[산출물 예시 2] 디지털 바이오 생태계 시뮬레이터 (생명 + 정보)</h2>
+            <p>빛과 중력 등 대안적 환경 변수에 따라 식물의 군락이 어떻게 적응해 변모하는지 관찰하는 시뮬레이터.</p>
+            <div class="panel" style="margin-top: 20px;">
+                <p style="font-family: 'Courier New', monospace; color: var(--accent-green); font-size: 18px; margin-bottom: 15px;">>>> L-System String: F -> FF+[+F-F-F]-[-F+F+F]</p>
+                <ul style="font-size: 18px;">
+                    <li><strong>중력의 크기:</strong> (0.1g ↔ 2.0g)</li>
+                    <li><strong>조명 컨트롤:</strong> (빛의 방향 및 세기: 0도 ↔ 180도)</li>
+                    <li><strong>생존 변수:</strong> (가지치기 확률 / 돌연변이 발생률)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>[산출물 예시 3] 혼돈 속 에너지 방전 모델 (화학/물리 + 정보)</h2>
+            <p>리히텐베르크 도형 및 수소 연소 최적화 경로 알고리즘(DLA)을 활용. 마우스 클릭에 따라 에너지가 저항이 가장 적은 경로를 폭발적으로 찾아가는 인터랙티브 아트.</p>
+            <div class="panel" style="margin-top: 20px;">
+                <ul style="font-size: 18px;">
+                    <li><strong>[매핑 버튼]</strong> 가상 공간의 '저항 맵(Obstacles)' 실시간 그리기</li>
+                    <li><strong>[수소 농도 및 에너지 응집도 조절]</strong> Low ↔ High 슬라이더</li>
+                    <li><strong>[색상 토글]</strong> 방전 속도에 따른 열에너지 스펙트럼 시각화 (Cold ↔ Hot)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>나만의 생태계를 창조할 디지털 무기고 (Toolstack)</h2>
+            <div class="grid-2">
+                <div class="box">
+                    <h3 style="font-size: 20px;">[아이디어 & 로직]</h3>
+                    <p style="color: var(--accent-cyan); font-weight: bold;">LLM (Claude, Gemini 등)</p>
+                    <p style="font-size: 16px;">복잡한 수학식(망델브로 차원 등)과 파이썬 기본 뼈대 코드(Boilerplate) 설계.</p>
+                </div>
+                <div class="box">
+                    <h3 style="font-size: 20px;">[구현 & 시뮬레이션]</h3>
+                    <p style="color: var(--accent-cyan); font-weight: bold;">JavaScript (p5.js), Python (Pygame)</p>
+                    <p style="font-size: 16px;">웹 브라우저나 독립 실행형 앱으로 실시간 렌더링 및 UI 슬라이더 구현.</p>
+                </div>
+                <div class="box">
+                    <h3 style="font-size: 20px;">[사운드 융합]</h3>
+                    <p style="color: var(--accent-cyan); font-weight: bold;">Suno (음악창작 AI)</p>
+                    <p style="font-size: 16px;">프랙탈의 기하학적 느낌을 담은 BGM 생성.</p>
+                </div>
+                <div class="box">
+                    <h3 style="font-size: 20px;">[발표 & 미디어]</h3>
+                    <p style="color: var(--accent-cyan); font-weight: bold;">Typecast (TTS AI), Canva</p>
+                    <p style="font-size: 16px;">앱 시연 영상을 위한 도슨트 및 UI 디자인 제작.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>완벽한 계획서 작성을 위한 4가지 체크리스트</h2>
+            <ul style="margin-top: 30px;">
+                <li style="margin-bottom: 25px;">
+                    <strong style="color: var(--accent-cyan);">[ ] 1. 융합의 명확성:</strong> 
+                    단순한 프랙탈 조사가 아닌, 교과 지식(물리, 화학, 생명 등)과 정보(코딩)가 융합된 뚜렷한 주제인가?
+                </li>
+                <li style="margin-bottom: 25px;">
+                    <strong style="color: var(--accent-cyan);">[ ] 2. 핵심 수식/알고리즘:</strong> 
+                    탐구의 뼈대가 될 수학/과학적 알고리즘이 구체적으로 명시되었는가? (예: L-System, DLA 알고리즘 등)
+                </li>
+                <li style="margin-bottom: 25px;">
+                    <strong style="color: var(--accent-cyan);">[ ] 3. 환경 변수 통제:</strong> 
+                    내가 상상한 세계에서 조작할 '환경 변수'가 명확한가? (예: 빛의 양, 중력, n세대 변화 등)
+                </li>
+                <li>
+                    <strong style="color: var(--accent-cyan);">[ ] 4. 인터랙티브 요소:</strong> 
+                    관람객이 단순히 보는 것을 넘어, 직접 변수를 조작하고 즉각적인 피드백을 경험할 수 있는 UI 요소가 포함되어 있는가?
+                </li>
+            </ul>
+        </div>
+
+        <div class="slide">
+            <h2 style="border-bottom: none; margin-bottom: 20px; text-align: center; width: 100%;">자연이 그려낸 무한한 암호,<br>이제 여러분의 손끝에서 새로운 우주로 탄생합니다.</h2>
+            <p style="font-size: 26px; text-align: center; color: var(--text-muted); margin-bottom: 40px;">
+                관찰자에 머물지 말고, 변수를 조작하는 창조주가 되십시오. 도전을 시작하세요!
+            </p>
+
+            <p style="font-size: 30px; color: var(--accent-yellow); font-weight: bold; margin-bottom: 40px; text-align: center;">
+                "실패를 두려워하지 말고 무한한 상상력을 코드로 펼쳐보세요!"
+            </p>
+            
+            <div class="grid-2">
+                <div class="box" style="border-top-color: var(--accent-green); padding: 20px;">
+                    <h3 style="margin-top: 0; font-size: 20px;">[참고 영상 자료]</h3>
+                    <a href="https://www.youtube.com/watch?v=bGhKj01mCLY" target="_blank" style="color: var(--accent-green); text-decoration: none; font-weight: bold; display: flex; align-items: center; background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; font-size: 16px;">
+                        ▶ 부분과 전체가 동일한 모양으로 끊임없이 반복되는 프랙탈 구조 / YTN 사이언스
+                    </a>
+                </div>
+                
+                <div class="box" style="border-top-color: var(--accent-purple); padding: 20px;">
+                    <h3 style="margin-top: 0; font-size: 20px;">[결과물 웹앱 예시]</h3>
+                    <a href="/example.html" target="_blank" style="color: var(--accent-purple); text-decoration: none; font-weight: bold; display: flex; align-items: center; background: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; font-size: 16px;">
+                        ▶ 번개 방전 시뮬레이션(DLA 알고리즘) 결과물 예시 체험하기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-number" id="current-slide">1 / 15</div>
+        <div class="progress-bar" id="progress"></div>
+        <div class="controls">
+            <button class="btn" onclick="prevSlide()">❮</button>
+            <button class="btn" onclick="nextSlide()">❯</button>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // 1. 공통 탭 제어 로직
-        // ==========================================
-        let currentMode = 1;
-        let isP5Active = true;
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+        const slideNumberDisplay = document.getElementById('current-slide');
+        const totalSlides = slides.length;
 
-        // p5.js 전용 변수
-        let depthSlider, angleSlider, lengthSlider;
-        let p5Bolts = [];
-
-        function setMode(mode) {
-            currentMode = mode;
-            
-            // 버튼 활성화 스타일
-            for(let i=1; i<=4; i++) {
-                document.getElementById('btn' + i).classList.remove('active');
-            }
-            document.getElementById('btn' + mode).classList.add('active');
-
-            let uiContainer = document.getElementById('ui-container');
-            let p5Container = document.getElementById('canvas-container');
-            let vanillaContainer = document.getElementById('vanilla-container');
-
-            // 초기화
-            uiContainer.innerHTML = '';
-            
-            if(depthSlider) depthSlider.hide();
-            if(angleSlider) angleSlider.hide();
-            if(lengthSlider) lengthSlider.hide();
-
-            // 1~3번 탭 (p5.js 작동)
-            if (mode >= 1 && mode <= 3) {
-                p5Container.style.display = 'block';
-                vanillaContainer.style.display = 'none';
-                isP5Active = true;
-                if(typeof loop === 'function') loop(); // p5 루프 재개
-                
-                if (mode === 1) {
-                    let div = createDiv(''); div.class('slider-group');
-                    let label = createSpan('시어핀스키 세대 (n) : '); label.class('slider-label');
-                    label.parent(div); depthSlider.parent(div); div.parent('ui-container');
-                    depthSlider.show();
-                } else if (mode === 2) {
-                    let div1 = createDiv(''); div1.class('slider-group');
-                    let label1 = createSpan('빛의 각도 : '); label1.class('slider-label');
-                    label1.parent(div1); angleSlider.parent(div1); div1.parent('ui-container');
-                    
-                    let div2 = createDiv(''); div2.class('slider-group');
-                    let label2 = createSpan('생장 길이 : '); label2.class('slider-label');
-                    label2.parent(div2); lengthSlider.parent(div2); div2.parent('ui-container');
-                    
-                    angleSlider.show(); lengthSlider.show();
-                } else if (mode === 3) {
-                    let msg = createDiv('마우스로 캔버스를 클릭하여 DLA 알고리즘 에너지를 방전시키세요.');
-                    msg.style('color', '#0ea5e9').style('font-weight', 'bold');
-                    msg.parent('ui-container');
-                    p5Bolts = [];
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlideIndex) {
+                    slide.classList.add('active');
                 }
-            } 
-            // 4번 탭 (Vanilla JS 작동)
-            else if (mode === 4) {
-                p5Container.style.display = 'none';
-                vanillaContainer.style.display = 'block';
-                isP5Active = false;
-                if(typeof noLoop === 'function') noLoop(); // p5 연산 정지 (최적화)
-                
-                let msg = createDiv('번개 시뮬레이션입니다. 아래 화면을 직접 클릭해보세요.');
-                msg.style('color', '#a855f7').style('font-weight', 'bold');
-                msg.parent('ui-container');
-            }
-        }
-
-        // ==========================================
-        // 2. p5.js 로직 (탭 1, 2, 3)
-        // ==========================================
-        function setup() {
-            let canvas = createCanvas(800, 600);
-            canvas.parent('canvas-container');
-
-            depthSlider = createSlider(1, 8, 1);
-            angleSlider = createSlider(0, Math.PI / 2, Math.PI / 4, 0.01);
-            lengthSlider = createSlider(50, 200, 120);
-
-            setMode(1);
-        }
-
-        function draw() {
-            if (!isP5Active) return;
-            
-            if (currentMode === 1) drawMode1();
-            else if (currentMode === 2) drawMode2();
-            else if (currentMode === 3) drawMode3();
-        }
-
-        // --- 탭 1 ---
-        function drawMode1() {
-            background(15, 23, 42);
-            fill(255); noStroke(); textSize(18); textAlign(LEFT, TOP);
-            text("현재 세대: " + depthSlider.value(), 20, 20);
-            
-            let p1 = createVector(width / 2, 50);
-            let p2 = createVector(50, height - 50);
-            let p3 = createVector(width - 50, height - 50);
-            
-            fill(14, 165, 233, 120); stroke(14, 165, 233);
-            drawSierpinski(p1, p2, p3, depthSlider.value());
-        }
-        function drawSierpinski(a, b, c, depth) {
-            if (depth === 1) { triangle(a.x, a.y, b.x, b.y, c.x, c.y); } 
-            else {
-                let ab = p5.Vector.lerp(a, b, 0.5), bc = p5.Vector.lerp(b, c, 0.5), ca = p5.Vector.lerp(c, a, 0.5);
-                drawSierpinski(a, ab, ca, depth - 1); drawSierpinski(ab, b, bc, depth - 1); drawSierpinski(ca, bc, c, depth - 1);
-            }
-        }
-
-        // --- 탭 2 ---
-        function drawMode2() {
-            background(15, 23, 42);
-            fill(255); noStroke(); textSize(18); textAlign(LEFT, TOP);
-            text("분기 각도: " + degrees(angleSlider.value()).toFixed(1) + "°", 20, 20);
-            
-            stroke(34, 197, 94);
-            push(); translate(width / 2, height); branch(lengthSlider.value()); pop();
-        }
-        function branch(len) {
-            strokeWeight(map(len, 10, 200, 1, 12)); line(0, 0, 0, -len); translate(0, -len);
-            if (len > 4) {
-                push(); rotate(angleSlider.value()); branch(len * 0.67); pop();
-                push(); rotate(-angleSlider.value()); branch(len * 0.67); pop();
-            }
-        }
-
-        // --- 탭 3 ---
-        function drawMode3() {
-            background(15, 23, 42, 30);
-            for (let b of p5Bolts) { b.update(); b.show(); }
-        }
-        function mousePressed() {
-            if (currentMode === 3 && isP5Active && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                p5Bolts.push(new P5Lightning(mouseX, mouseY, random(-PI, PI), 12));
-            }
-        }
-        class P5Lightning {
-            constructor(x, y, angle, thickness) {
-                this.pos = createVector(x, y); this.angle = angle; this.thickness = thickness; this.active = true;
-                this.col = color(random(150, 255), random(150, 255), 255);
-            }
-            update() {
-                if (!this.active) return;
-                let step = p5.Vector.fromAngle(this.angle); step.mult(random(8, 20));
-                let nextPos = p5.Vector.add(this.pos, step);
-                if (nextPos.x < 0 || nextPos.x > width || nextPos.y < 0 || nextPos.y > height || this.thickness < 1) this.active = false;
-                if (random(1) < 0.25) { 
-                    p5Bolts.push(new P5Lightning(this.pos.x, this.pos.y, this.angle + random(-PI/3, PI/3), this.thickness * 0.7));
-                }
-                this.pos = nextPos; this.thickness *= 0.92;
-            }
-            show() {
-                if (!this.active) return;
-                stroke(this.col); strokeWeight(this.thickness); point(this.pos.x, this.pos.y);
-            }
-        }
-
-        // ==========================================
-        // 3. 고해상도 번개 로직 (탭 4 - Vanilla JS)
-        // ==========================================
-        const vCanvas = document.getElementById("stormCanvas");
-        const flashLayer = document.getElementById("flashLayer");
-        const ctx = vCanvas.getContext("2d");
-
-        const advancedBolts = [];
-        const sparks = [];
-        const stars = [];
-
-        let vWidth = 800; // p5 캔버스와 동일한 고정 크기
-        let vHeight = 600;
-        let dpr = Math.min(window.devicePixelRatio || 1, 2);
-        let flashEnergy = 0;
-        let lastTime = performance.now();
-
-        function vRandom(min, max) { return Math.random() * (max - min) + min; }
-
-        function initVanillaCanvas() {
-            vCanvas.width = Math.floor(vWidth * dpr);
-            vCanvas.height = Math.floor(vHeight * dpr);
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-            stars.length = 0;
-            const starCount = 40;
-            for (let i = 0; i < starCount; i++) {
-                stars.push({
-                    x: vRandom(0, vWidth), y: vRandom(0, vHeight), r: vRandom(0.4, 1.8),
-                    twinkle: vRandom(0.6, 1.2), phase: vRandom(0, Math.PI * 2)
-                });
-            }
-        }
-
-        function displaceSegment(start, end, displacement, iterations) {
-            let points = [start, end];
-            for (let i = 0; i < iterations; i++) {
-                const next = [points[0]];
-                for (let p = 0; p < points.length - 1; p++) {
-                    const a = points[p], b = points[p + 1];
-                    const midX = (a.x + b.x) * 0.5, midY = (a.y + b.y) * 0.5;
-                    const dx = b.x - a.x, dy = b.y - a.y;
-                    const len = Math.hypot(dx, dy) || 1;
-                    const nx = -dy / len, ny = dx / len;
-                    const offset = vRandom(-displacement, displacement);
-                    next.push({ x: midX + nx * offset, y: midY + ny * offset });
-                    next.push(b);
-                }
-                points = next; displacement *= 0.58;
-            }
-            return points;
-        }
-
-        function createFractalBolt(from, to, options = {}) {
-            const life = options.life ?? vRandom(360, 620);
-            const widthBase = options.widthBase ?? vRandom(1.8, 3.4);
-            const hue = options.hue ?? vRandom(195, 230);
-            const iterations = options.iterations ?? 5;
-            const displacement = options.displacement ?? Math.hypot(to.x - from.x, to.y - from.y) * 0.16;
-            const root = displaceSegment(from, to, displacement, iterations);
-            const branches = [];
-            const branchCount = options.branchCount ?? Math.floor(vRandom(3, 7));
-            
-            for (let i = 0; i < branchCount; i++) {
-                const anchorIndex = Math.floor(vRandom(root.length * 0.2, root.length * 0.9));
-                const anchor = root[anchorIndex];
-                if (!anchor) continue;
-                const angle = vRandom(-Math.PI * 0.95, Math.PI * 0.15);
-                const branchLength = vRandom(50, 180) * (1 - i / (branchCount + 2));
-                const branchEnd = { x: anchor.x + Math.cos(angle) * branchLength, y: anchor.y + Math.sin(angle) * branchLength };
-                branches.push({
-                    points: displaceSegment(anchor, branchEnd, branchLength * 0.25, 3),
-                    width: widthBase * vRandom(0.35, 0.6)
-                });
-            }
-            return { points: root, branches, born: performance.now(), life, widthBase, hue, seed: Math.random() * 1000 };
-        }
-
-        function spawnSparks(x, y, amount = 30) {
-            for (let i = 0; i < amount; i++) {
-                const angle = vRandom(0, Math.PI * 2); const speed = vRandom(40, 340);
-                sparks.push({
-                    x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-                    life: vRandom(260, 680), age: 0, size: vRandom(1, 2.8), hue: vRandom(190, 220)
-                });
-            }
-        }
-
-        function linePath(points, progress = 1) {
-            if (points.length < 2) return;
-            const maxIndex = Math.floor((points.length - 1) * progress);
-            ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
-            for (let i = 1; i <= maxIndex; i++) ctx.lineTo(points[i].x, points[i].y);
-            const frac = (points.length - 1) * progress - maxIndex;
-            if (frac > 0 && maxIndex + 1 < points.length) {
-                const a = points[maxIndex], b = points[maxIndex + 1];
-                ctx.lineTo(a.x + (b.x - a.x) * frac, a.y + (b.y - a.y) * frac);
-            }
-        }
-
-        function renderAdvancedBolt(bolt, now) {
-            const age = now - bolt.born;
-            if (age > bolt.life) return false;
-            const lifeT = age / bolt.life;
-            const fade = 1 - lifeT;
-            const reveal = Math.min(1, lifeT * 2.8 + 0.1);
-            const flicker = 0.85 + Math.sin(now * 0.045 + bolt.seed) * 0.15;
-            const alpha = fade * flicker;
-
-            ctx.globalCompositeOperation = "lighter";
-            ctx.shadowBlur = 26; ctx.shadowColor = `hsla(${bolt.hue}, 100%, 70%, ${alpha})`;
-            ctx.lineCap = "round"; ctx.lineJoin = "round";
-
-            linePath(bolt.points, reveal);
-            ctx.strokeStyle = `hsla(${bolt.hue}, 100%, 76%, ${alpha * 0.95})`; ctx.lineWidth = bolt.widthBase * 2.1; ctx.stroke();
-
-            linePath(bolt.points, reveal);
-            ctx.strokeStyle = `hsla(${bolt.hue + 6}, 100%, 94%, ${Math.min(1, alpha + 0.08)})`; ctx.lineWidth = bolt.widthBase * 0.9; ctx.stroke();
-
-            for (const branch of bolt.branches) {
-                linePath(branch.points, reveal * 1.05);
-                ctx.strokeStyle = `hsla(${bolt.hue + 14}, 100%, 84%, ${alpha * 0.76})`; ctx.lineWidth = branch.width; ctx.stroke();
-            }
-            flashEnergy = Math.max(flashEnergy, alpha * 0.95);
-            return true;
-        }
-
-        function renderSparks(dt) {
-            for (let i = sparks.length - 1; i >= 0; i--) {
-                const s = sparks[i]; s.age += dt;
-                if (s.age > s.life) { sparks.splice(i, 1); continue; }
-                s.x += s.vx * (dt / 1000); s.y += s.vy * (dt / 1000);
-                s.vx *= 0.986; s.vy = s.vy * 0.986 + 380 * (dt / 1000);
-                const t = 1 - s.age / s.life;
-                ctx.beginPath(); ctx.arc(s.x, s.y, s.size * t, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${s.hue}, 100%, 74%, ${t * 0.9})`; ctx.fill();
-            }
-        }
-
-        function renderStars(now) {
-            ctx.globalCompositeOperation = "source-over";
-            for (const star of stars) {
-                const twinkle = 0.45 + Math.sin(now * 0.0018 * star.twinkle + star.phase) * 0.35;
-                ctx.beginPath(); ctx.arc(star.x, star.y, star.r * twinkle, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(176, 212, 255, ${0.22 + twinkle * 0.32})`; ctx.fill();
-            }
-        }
-
-        function animateVanilla(now) {
-            requestAnimationFrame(animateVanilla);
-            
-            // 탭4 활성화일때만 렌더링 최적화
-            if (currentMode !== 4) return;
-
-            const dt = Math.min(34, now - lastTime || 16);
-            lastTime = now;
-
-            ctx.clearRect(0, 0, vWidth, vHeight);
-            renderStars(now);
-
-            for (let i = advancedBolts.length - 1; i >= 0; i--) {
-                const alive = renderAdvancedBolt(advancedBolts[i], now);
-                if (!alive) advancedBolts.splice(i, 1);
-            }
-            renderSparks(dt);
-            
-            flashEnergy *= 0.88;
-            flashLayer.style.opacity = String(Math.min(0.95, flashEnergy));
-        }
-
-        function strikeAdvanced(x, y) {
-            const start = { x: x + vRandom(-50, 50), y: vRandom(-50, 30) };
-            const end = { x, y };
-            const primary = createFractalBolt(start, end, {
-                branchCount: Math.floor(vRandom(5, 9)), widthBase: vRandom(2.3, 4.1), life: vRandom(440, 760), iterations: 6
             });
-            advancedBolts.push(primary);
-
-            const echoCount = Math.floor(vRandom(1, 3));
-            for (let i = 0; i < echoCount; i++) {
-                const delay = i * vRandom(28, 64);
-                setTimeout(() => {
-                    advancedBolts.push(createFractalBolt(
-                        { x: start.x + vRandom(-60, 60), y: start.y + vRandom(-10, 40) },
-                        { x: end.x + vRandom(-80, 80), y: end.y + vRandom(-45, 35) },
-                        { branchCount: Math.floor(vRandom(3, 6)), widthBase: vRandom(1.4, 2.8), life: vRandom(260, 420), iterations: 4, hue: vRandom(188, 216) }
-                    ));
-                }, delay);
-            }
-
-            flashLayer.style.setProperty("--x", `${(x / vWidth) * 100}%`);
-            flashLayer.style.setProperty("--y", `${(y / vHeight) * 100}%`);
-            flashEnergy = Math.min(1, flashEnergy + 0.9);
-            spawnSparks(x, y, Math.floor(vRandom(26, 42)));
+            
+            const progressPercentage = ((currentSlideIndex + 1) / totalSlides) * 100;
+            progressBar.style.width = progressPercentage + '%';
+            slideNumberDisplay.innerText = `${currentSlideIndex + 1} / ${totalSlides}`;
         }
 
-        vCanvas.addEventListener("pointerdown", (event) => {
-            if (currentMode === 4) {
-                const rect = vCanvas.getBoundingClientRect();
-                const scaleX = vCanvas.width / rect.width / dpr;
-                const scaleY = vCanvas.height / rect.height / dpr;
-                strikeAdvanced((event.clientX - rect.left) * scaleX, (event.clientY - rect.top) * scaleY);
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                updateSlides();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                updateSlides();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
             }
         });
 
-        // 초기화 및 루프 실행
-        initVanillaCanvas();
-        requestAnimationFrame(animateVanilla);
-
-        // 첫 등장 시 자동 시연 타격 3번
-        setTimeout(() => {
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => {
-                    strikeAdvanced(vRandom(vWidth * 0.15, vWidth * 0.85), vRandom(vHeight * 0.22, vHeight * 0.88));
-                }, i * 240);
-            }
-        }, 500);
-        
+        updateSlides();
     </script>
 </body>
 </html>
