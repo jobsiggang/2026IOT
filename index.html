@@ -175,6 +175,59 @@
         .btn:hover { background: var(--accent-cyan); border-color: var(--accent-cyan); }
         .progress-bar { position: absolute; bottom: 0; left: 0; height: 6px; background: var(--accent-cyan); transition: width 0.3s ease; }
         .slide-number { position: absolute; bottom: 45px; left: 40px; color: var(--text-muted); font-size: 18px; font-weight: bold; }
+
+        .link-quad-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 18px;
+            width: 100%;
+        }
+
+        .link-quad-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 145px;
+            padding: 20px 22px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            text-decoration: none;
+            color: var(--text-main);
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            box-shadow: 0 10px 26px rgba(2, 6, 23, 0.4);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .link-quad-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(2, 6, 23, 0.55);
+            opacity: 1;
+        }
+
+        .link-quad-title {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .link-quad-desc {
+            font-size: 17px;
+            line-height: 1.45;
+            color: #cbd5e1;
+            margin: 0;
+        }
+
+        .card-green { border-top: 4px solid var(--accent-green); }
+        .card-purple { border-top: 4px solid var(--accent-purple); }
+        .card-cyan { border-top: 4px solid var(--accent-cyan); }
+        .card-yellow { border-top: 4px solid var(--accent-yellow); }
+
+        .card-green .link-quad-title { color: var(--accent-green); }
+        .card-purple .link-quad-title { color: var(--accent-purple); }
+        .card-cyan .link-quad-title { color: var(--accent-cyan); }
+        .card-yellow .link-quad-title { color: var(--accent-yellow); }
     </style>
 </head>
 <body>
@@ -187,6 +240,33 @@
             <p style="font-size: 32px; color: var(--text-main); font-weight: 300;">무한한 반복으로 설계하는 새로운 세상</p>
             <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #334155;">
                 <p style="color: var(--accent-cyan); font-weight: bold; font-size: 24px;">고등학교 프로젝트 활동 안내 및 계획서 작성 가이드</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 style="border-bottom: none; margin-bottom: 20px; text-align: center; width: 100%;">자연이 그려낸 무한한 암호,<br>이제 여러분의 손끝에서 새로운 우주로 탄생합니다.</h2>
+
+
+            <div class="link-quad-grid">
+                <a class="link-quad-card card-green" href="https://www.youtube.com/watch?v=bGhKj01mCLY" target="_blank">
+                    <span class="link-quad-title">참고 영상 자료</span>
+                    <p class="link-quad-desc">프랙탈 구조를 직관적으로 이해할 수 있는 YTN 사이언스 영상 보기</p>
+                </a>
+
+                <a class="link-quad-card card-purple" href="/example.html" target="_blank">
+                    <span class="link-quad-title">결과물 웹앱 예시</span>
+                    <p class="link-quad-desc">번개 방전 시뮬레이션(DLA) 데모를 실행해 인터랙션 체험하기</p>
+                </a>
+
+                <a class="link-quad-card card-cyan" href="https://docs.google.com/document/d/1Ym27V2UUM4VSD6R18DOFtFfFcOuFqX1Fwj1Pw42f9IY/edit?tab=t.0" target="_blank">
+                    <span class="link-quad-title">계획서 예시 문서</span>
+                    <p class="link-quad-desc">주제, 가설, 변수, 산출물 구성까지 바로 참고 가능한 작성 샘플 열기</p>
+                </a>
+
+                <a class="link-quad-card card-yellow" href="https://docs.google.com/presentation/d/1XY2ME4EvZGggchen8RJUuZcNzV4iIJJ9/edit?slide=id.p1#slide=15" target="_blank">
+                    <span class="link-quad-title">전체 슬라이드보기</span>
+                    <p class="link-quad-desc">현재 발표 자료 전체를 열어 흐름과 배치, 구성을 한 번에 확인하기</p>
+                </a>
             </div>
         </div>
 
@@ -413,33 +493,6 @@
                     관람객이 단순히 보는 것을 넘어, 직접 변수를 조작하고 즉각적인 피드백을 경험할 수 있는 UI 요소가 포함되어 있는가?
                 </li>
             </ul>
-        </div>
-
-        <div class="slide">
-            <h2 style="border-bottom: none; margin-bottom: 20px; text-align: center; width: 100%;">자연이 그려낸 무한한 암호,<br>이제 여러분의 손끝에서 새로운 우주로 탄생합니다.</h2>
-            <p style="font-size: 26px; text-align: center; color: var(--text-muted); margin-bottom: 40px;">
-                관찰자에 머물지 말고, 변수를 조작하는 창조주가 되십시오. 도전을 시작하세요!
-            </p>
-
-            <p style="font-size: 30px; color: var(--accent-yellow); font-weight: bold; margin-bottom: 40px; text-align: center;">
-                "실패를 두려워하지 말고 무한한 상상력을 코드로 펼쳐보세요!"
-            </p>
-            
-            <div class="grid-2">
-                <div class="box" style="border-top-color: var(--accent-green); padding: 20px;">
-                    <h3 style="margin-top: 0; font-size: 20px;">[참고 영상 자료]</h3>
-                    <a href="https://www.youtube.com/watch?v=bGhKj01mCLY" target="_blank" style="color: var(--accent-green); text-decoration: none; font-weight: bold; display: flex; align-items: center; background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; font-size: 16px;">
-                        ▶ 부분과 전체가 동일한 모양으로 끊임없이 반복되는 프랙탈 구조 / YTN 사이언스
-                    </a>
-                </div>
-                
-                <div class="box" style="border-top-color: var(--accent-purple); padding: 20px;">
-                    <h3 style="margin-top: 0; font-size: 20px;">[결과물 웹앱 예시]</h3>
-                    <a href="/example.html" target="_blank" style="color: var(--accent-purple); text-decoration: none; font-weight: bold; display: flex; align-items: center; background: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; font-size: 16px;">
-                        ▶ 번개 방전 시뮬레이션(DLA 알고리즘) 결과물 예시 체험하기
-                    </a>
-                </div>
-            </div>
         </div>
 
         <div class="slide-number" id="current-slide">1 / 15</div>
